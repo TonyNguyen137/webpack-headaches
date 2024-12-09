@@ -1,0 +1,44 @@
+@use '../abstracts' as *;
+
+.cta {
+  text-decoration: none;
+  padding-block: px-to-rem(12);
+  padding-inline: px-to-rem(15);
+  border-radius: px-to-rem(50);
+  background-color: #28a45a;
+  color: #fff;
+  text-transform: uppercase;
+  display: inline-block;
+  font-size: 0.8rem;
+  transition: background-color 0.2s;
+}
+
+.cta--darker {
+  background-color: hsl(144, 61%, 30%);
+}
+
+.cta span {
+  position: relative;
+  transition: 0.2s;
+
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .cta span::after {
+    content: '\00bb';
+    position: absolute;
+    opacity: 0;
+    top: -2px;
+    right: -20px;
+    transition: 0.5s;
+  }
+
+  .cta:hover span {
+    padding-right: 15px;
+  } 
+  
+  .cta:hover span::after {
+    opacity: 1;
+    right:0;
+  } 
+}

@@ -1,0 +1,10 @@
+@use '../abstracts' as *;
+
+.single-content {
+  ul {
+    list-style-position: inside;
+  }
+  section {
+    padding-inline: 12px;
+  }
+}
