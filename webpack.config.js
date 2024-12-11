@@ -1,7 +1,5 @@
 const path = require('path');
 const HtmlBundlerPlugin = require('html-bundler-webpack-plugin');
-const glob = require('glob');
-const { PurgeCSSPlugin } = require('purgecss-webpack-plugin');
 
 const PATHS = {
   src: path.join(__dirname, 'src/views'),
@@ -19,10 +17,9 @@ module.exports = (env) => {
 
     resolve: {
       alias: {
-        '@scripts': path.join(__dirname, 'src', 'js'),
         '@styles': path.join(__dirname, 'src', 'scss'),
-        '@images': path.join(__dirname, 'src', 'assets', 'img'),
-        '@fonts': path.join(__dirname, 'src', 'assets', 'fonts'),
+        '@images': path.join(__dirname, 'src', 'img'),
+        '@fonts': path.join(__dirname, 'src', 'fonts'),
       },
     },
 
@@ -33,7 +30,7 @@ module.exports = (env) => {
         // path to templates
         entry: [
           {
-            import: 'src/views/index.hbs',
+            import: 'src/index.hbs',
             filename: 'index.html',
           },
         ],
@@ -46,28 +43,13 @@ module.exports = (env) => {
           // output filename for CSS
           filename: '[name].[contenthash:8].css',
         },
-        // exclude: [
-        //     'src/include/header.html', // Adjust this path as per your file structure
-        // ],
+
         preprocessor: 'handlebars',
 
-        exclude: ['src/partials/header.hbs'],
-        minify: true,
+        minify: env.mode === 'production',
       }),
-      env.mode === 'production' &&
-        new PurgeCSSPlugin({
-          paths: glob.sync(`${PATHS.src}/**/*`, { nodir: true }),
-          content: ['**/*.js', '**/*.html', '**/*.hbs'],
-          //   safelist: {
-          //     standard: [/aria/, /data/, /:focus/],
-          //     deep: [/aria/, /data/, /^.*\[/],
-          //     greedy: [/aria/, /data/, /^.*\[/],
-          //   },
-        }),
     ],
-    stats: {
-      loggingDebug: ['sass-loader'],
-    },
+
     module: {
       rules: [
         {
@@ -98,7 +80,6 @@ module.exports = (env) => {
             'sass-loader',
           ],
         },
-
         {
           test: /\.(png|jp?g|webp)$/,
           type: 'asset',
@@ -127,35 +108,7 @@ module.exports = (env) => {
             },
           },
         },
-
-        {
-          test: /\.(ico|svg)$/,
-          type: 'asset/resource',
-          generator: {
-            filename: 'assets/img/[name].[hash:8][ext][query]',
-          },
-        },
-
-        {
-          test: /\.(ttf|woff2|woff)/,
-          type: 'asset',
-          generator: {
-            // save fonts to file
-            filename: 'assets/fonts/[name].[ext]',
-          },
-        },
       ],
-    },
-
-    // enable HMR with live reload
-    devServer: {
-      static: path.resolve(__dirname, 'dist'),
-      watchFiles: {
-        paths: ['src/**/*.*'],
-        options: {
-          usePolling: true,
-        },
-      },
     },
   };
 };
