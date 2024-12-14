@@ -1,18 +1,22 @@
 const path = require('path');
 const HtmlBundlerPlugin = require('html-bundler-webpack-plugin');
 
-const PATHS = {
-  src: path.join(__dirname, 'src/views'),
-};
-
 module.exports = (env) => {
+  console.log('here: ', env.WEBPACK_SERVE);
+
   return {
-    mode: env.mode,
-    devtool: env.mode === 'production' ? false : 'source-map',
+    devtool: env.WEBPACK_SERVE ? 'source-map' : false,
 
     output: {
       path: path.resolve(__dirname, 'dist'),
       clean: true,
+    },
+
+    devServer: {
+      static: {
+        directory: path.join(__dirname, 'src', 'img'),
+      },
+      compress: true,
     },
 
     resolve: {
@@ -20,20 +24,19 @@ module.exports = (env) => {
         '@styles': path.join(__dirname, 'src', 'scss'),
         '@images': path.join(__dirname, 'src', 'img'),
         '@fonts': path.join(__dirname, 'src', 'fonts'),
+        '@scripts': path.join(__dirname, 'src', 'js'),
       },
     },
 
     plugins: [
-      // copies files into dist folder
-
       new HtmlBundlerPlugin({
         // path to templates
-        entry: [
-          {
-            import: 'src/index.hbs',
-            filename: 'index.html',
-          },
-        ],
+        entry: {
+          index: path.join(__dirname, 'src/index.html'), // => dist/index.html
+        },
+        // loaderOptions: {
+        //   sources: [{ tag: 'a', attributes: ['href'] }],
+        // },
 
         js: {
           // output filename for JS
@@ -46,7 +49,7 @@ module.exports = (env) => {
 
         preprocessor: 'handlebars',
 
-        minify: env.mode === 'production',
+        minify: env.WEBPACK_BUILD ?? false,
       }),
     ],
 
@@ -54,31 +57,7 @@ module.exports = (env) => {
       rules: [
         {
           test: /\.(scss)$/,
-          use: [
-            'css-loader',
-            {
-              loader: 'postcss-loader',
-              options: {
-                postcssOptions: {
-                  plugins: [
-                    [
-                      'postcss-preset-env',
-                      {
-                        stage: 3,
-                        features: {
-                          'nesting-rules': true,
-                          clamp: true,
-                          'custom-properties': false,
-                        },
-                      },
-                    ],
-                    ['postcss-sort-media-queries'],
-                  ],
-                },
-              },
-            },
-            'sass-loader',
-          ],
+          use: ['css-loader', 'sass-loader'],
         },
         {
           test: /\.(png|jp?g|webp)$/,
@@ -95,9 +74,9 @@ module.exports = (env) => {
               // console.log('WIDTH: ', width);
 
               if (width) {
-                return `assets/img/[name]-w${width}[ext]`;
+                return `assets/[name]-w${width}[ext]`;
               }
-              return `assets/img/[name][ext]`;
+              return `assets/[name][ext]`;
             },
           },
 
@@ -106,6 +85,14 @@ module.exports = (env) => {
               // inline images < 2 KB
               maxSize: 500,
             },
+          },
+        },
+        {
+          test: /\.(ttf|woff2|woff)/,
+          type: 'asset',
+          generator: {
+            // save fonts to file
+            filename: 'assets/[name].[ext]',
           },
         },
       ],

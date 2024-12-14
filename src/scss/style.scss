@@ -1,2 +1,4 @@
 @use 'font-face';
-@use 'swiper';
+// webpack cant resolve alias
+// @use 'swiper';
+@use 'photoswipe';
