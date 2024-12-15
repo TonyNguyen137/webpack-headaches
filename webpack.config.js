@@ -2,6 +2,8 @@ const path = require('path');
 const HtmlBundlerPlugin = require('html-bundler-webpack-plugin');
 
 module.exports = (env) => {
+  console.log(env);
+
   return {
     devtool: env.WEBPACK_SERVE ? 'source-map' : false,
 
@@ -12,30 +14,19 @@ module.exports = (env) => {
 
     resolve: {
       alias: {
-        '@styles': path.join(__dirname, 'src', 'scss'),
-        '@images': path.join(__dirname, 'src', 'img'),
         '@fonts': path.join(__dirname, 'src', 'fonts'),
-        '@scripts': path.join(__dirname, 'src', 'js'),
       },
     },
 
     plugins: [
       new HtmlBundlerPlugin({
         // path to templates
-        entry: {
-          index: path.join(__dirname, 'src/index.html'), // => dist/index.html
-        },
-        loaderOptions: {
-          sources: [
-            {
-              tag: 'a',
-              attributes: ['href'],
-              filter: ({ value }) => {
-                return !value.endsWith('.html');
-              },
-            },
-          ],
-        },
+        entry: [
+          {
+            import: 'src/index.html',
+            filename: 'index.html',
+          },
+        ],
 
         js: {
           // output filename for JS
@@ -46,18 +37,19 @@ module.exports = (env) => {
           filename: '[name].[contenthash:8].css',
         },
 
-        preprocessor: 'handlebars',
-
         minify: env.WEBPACK_BUILD ?? false,
       }),
     ],
-
+    stats: {
+      loggingDebug: ['sass-loader'],
+    },
     module: {
       rules: [
         {
           test: /\.(scss)$/,
           use: ['css-loader', 'sass-loader'],
         },
+
         {
           test: /\.(png|jp?g|webp)$/,
           type: 'asset',
@@ -73,28 +65,41 @@ module.exports = (env) => {
               // console.log('WIDTH: ', width);
 
               if (width) {
-                return `assets/[name]-w${width}[ext]`;
+                return `assets/img/[name]-w${width}[ext]`;
               }
-              return `assets/[name][ext]`;
-            },
-          },
-
-          parser: {
-            dataUrlCondition: {
-              // inline images < 2 KB
-              maxSize: 500,
+              return `assets/img/[name][ext]`;
             },
           },
         },
+
+        {
+          test: /\.(ico|svg)$/,
+          type: 'asset/resource',
+          generator: {
+            filename: 'assets/img/[name].[hash:8][ext][query]',
+          },
+        },
+
         {
           test: /\.(ttf|woff2|woff)/,
           type: 'asset',
           generator: {
             // save fonts to file
-            filename: 'assets/[name].[ext]',
+            filename: 'assets/fonts/[name].[ext]',
           },
         },
       ],
+    },
+
+    // enable HMR with live reload
+    devServer: {
+      static: path.resolve(__dirname, 'dist'),
+      watchFiles: {
+        paths: ['src/**/*.*'],
+        options: {
+          usePolling: true,
+        },
+      },
     },
   };
 };

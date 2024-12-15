@@ -1,0 +1,9 @@
+@use '/node_modules/swiper/modules/navigation.scss';
+@use '/node_modules/swiper/swiper.scss';
+@font-face {
+  font-family: 'montserrat';
+  src: url('fonts/Montserrat-light.woff2') format('woff2');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
