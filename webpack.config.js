@@ -2,21 +2,12 @@ const path = require('path');
 const HtmlBundlerPlugin = require('html-bundler-webpack-plugin');
 
 module.exports = (env) => {
-  console.log('here: ', env.WEBPACK_SERVE);
-
   return {
     devtool: env.WEBPACK_SERVE ? 'source-map' : false,
 
     output: {
       path: path.resolve(__dirname, 'dist'),
       clean: true,
-    },
-
-    devServer: {
-      static: {
-        directory: path.join(__dirname, 'src', 'img'),
-      },
-      compress: true,
     },
 
     resolve: {
@@ -34,9 +25,17 @@ module.exports = (env) => {
         entry: {
           index: path.join(__dirname, 'src/index.html'), // => dist/index.html
         },
-        // loaderOptions: {
-        //   sources: [{ tag: 'a', attributes: ['href'] }],
-        // },
+        loaderOptions: {
+          sources: [
+            {
+              tag: 'a',
+              attributes: ['href'],
+              filter: ({ value }) => {
+                return !value.endsWith('.html');
+              },
+            },
+          ],
+        },
 
         js: {
           // output filename for JS
