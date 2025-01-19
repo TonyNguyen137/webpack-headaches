@@ -1,5 +1,6 @@
 const path = require('path');
 const HtmlBundlerPlugin = require('html-bundler-webpack-plugin');
+const ImageMinimizerPlugin = require('image-minimizer-webpack-plugin');
 
 module.exports = (env) => {
   console.log(env);
@@ -15,6 +16,7 @@ module.exports = (env) => {
     resolve: {
       alias: {
         '@fonts': path.join(__dirname, 'src', 'fonts'),
+        '@images': path.join(__dirname, 'src', 'images'),
       },
     },
 
@@ -88,6 +90,44 @@ module.exports = (env) => {
             filename: 'assets/fonts/[name].[ext]',
           },
         },
+      ],
+    },
+    optimization: {
+      // minimize: false,
+      minimizer: [
+        new ImageMinimizerPlugin({
+          minimizer: {
+            implementation: ImageMinimizerPlugin.sharpMinify,
+          },
+          generator: [
+            {
+              // You can apply generator using `?as=webp`, you can use any name and provide more options
+              preset: 'webp',
+              implementation: ImageMinimizerPlugin.sharpGenerate,
+              options: {
+                encodeOptions: {
+                  // Please specify only one codec here, multiple codecs will not work
+                  webp: {
+                    quality: 70,
+                  },
+                },
+              },
+            },
+            {
+              // You can apply generator using `?as=avif`, you can use any name and provide more options
+              preset: 'avif',
+              implementation: ImageMinimizerPlugin.sharpGenerate,
+              options: {
+                encodeOptions: {
+                  // Please specify only one codec here, multiple codecs will not work
+                  avif: {
+                    quality: 70,
+                  },
+                },
+              },
+            },
+          ],
+        }),
       ],
     },
 
